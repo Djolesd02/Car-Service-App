@@ -35,7 +35,6 @@ export default function DetaljiNaloga() {
     loadData();
   }, [id]);
 
-  // FUNKCIJA ZA PROMENU STATUSA
   const ažurirajStatus = async (noviStatus: string) => {
     try {
       const res = await fetch(`/api/nalozi/${id}`, {
@@ -47,7 +46,7 @@ export default function DetaljiNaloga() {
       if (res.ok) {
         if (noviStatus === 'Završeno') {
           alert("RADNI NALOG JE ZAVRŠEN I ARHIVIRAN.");
-          router.push('/'); // Vraćamo se na početnu jer je nalog sklonjen iz aktivnih
+          router.push('/');
         } else {
           setNalog({ ...nalog, status: noviStatus });
         }
@@ -121,23 +120,38 @@ export default function DetaljiNaloga() {
 
   return (
     <div className="min-h-screen bg-[#0F172A] text-slate-200 uppercase tracking-tight font-sans p-4 md:p-12">
-      <div className="max-w-[1400px] mx-auto">
+      {/* CSS ZA ŠTAMPU - SAKRIVA SVE OSIM BITNIH STVARI */}
+      <style jsx global>{`
+        @media print {
+          body { background: white !important; color: black !important; }
+          .no-print, button, form, .status-selector, nav, a { display: none !important; }
+          .print-area { display: block !important; width: 100% !important; margin: 0 !important; padding: 20px !important; color: black !important; }
+          .print-header { border-bottom: 2px solid black; margin-bottom: 20px; padding-bottom: 10px; }
+          .print-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+          .print-table th, .print-table td { border: 1px solid #ddd; padding: 12px; text-align: left; color: black !important; }
+          .print-total { font-size: 24px; font-weight: bold; text-align: right; margin-top: 20px; }
+          textarea { border: none !important; color: black !important; width: 100% !important; height: auto !important; }
+        }
+      `}</style>
+
+      <div className="max-w-[1400px] mx-auto print-area">
         
-        {/* DUGME NAZAD */}
-        <Link href="/" className="inline-block mb-8 text-[10px] font-black tracking-widest text-slate-500 hover:text-[#A3E635] transition-colors">
+        {/* DUGME NAZAD (SAKRIVA SE PRI ŠTAMPI) */}
+        <Link href="/" className="no-print inline-block mb-8 text-[10px] font-black tracking-widest text-slate-500 hover:text-[#A3E635] transition-colors">
           ← NAZAD NA DASHBOARD
         </Link>
 
-        {/* ZAGLAVLJE SA STATUSIMA */}
-        <div className="flex flex-col md:flex-row justify-between items-start mb-12 gap-8 border-b border-slate-800 pb-12">
+        {/* ZAGLAVLJE */}
+        <div className="flex flex-col md:flex-row justify-between items-start mb-12 gap-8 border-b border-slate-800 pb-12 print-header">
           <div>
-            <h1 className="text-5xl md:text-7xl font-[1000] italic tracking-tighter text-white mb-2 leading-none">
+            <h1 className="text-5xl md:text-7xl font-[1000] italic tracking-tighter text-white print:text-black mb-2 leading-none">
               {nalog.marka} {nalog.model}
             </h1>
-            <p className="text-[#A3E635] font-black tracking-[0.2em] text-xl md:text-2xl">{nalog.registracija}</p>
+            <p className="text-[#A3E635] print:text-black font-black tracking-[0.2em] text-xl md:text-2xl">{nalog.registracija}</p>
+            <p className="hidden print:block text-sm font-bold mt-2">VIN: {nalog.vin || 'N/A'}</p>
             
-            {/* STATUS SELECTOR */}
-            <div className="flex flex-wrap gap-2 mt-6">
+            {/* STATUS SELECTOR (SAKRIVA SE PRI ŠTAMPI) */}
+            <div className="no-print flex flex-wrap gap-2 mt-6">
               {['Na čekanju', 'U radu', 'Čeka delove'].map((s) => (
                 <button
                   key={s}
@@ -158,7 +172,7 @@ export default function DetaljiNaloga() {
             </div>
           </div>
 
-          <div className="w-full md:w-auto flex flex-col gap-4">
+          <div className="w-full md:w-auto flex flex-col gap-4 no-print">
              <div className="bg-[#1E293B] p-6 rounded-3xl border border-slate-800 shadow-xl">
                 <p className="text-[9px] font-black text-slate-500 mb-1 tracking-widest uppercase">RADIO PIN KOD</p>
                 <p className="text-3xl font-[1000] text-[#A3E635] tracking-[0.2em]">{nalog.radio_kod || '----'}</p>
@@ -170,11 +184,12 @@ export default function DetaljiNaloga() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-12">
-          {/* LEVA KOLONA (Gemini i Beleške ostaju isti kao u tvom kodu) */}
+          {/* LEVA KOLONA */}
           <div className="lg:col-span-2 space-y-8">
-            <section className="bg-gradient-to-br from-[#1E293B] to-[#0F172A] rounded-[2.5rem] md:rounded-[3rem] border border-blue-500/20 shadow-2xl flex flex-col h-[500px] md:h-[700px] overflow-hidden">
+            {/* GEMINI CHAT (SAKRIVA SE PRI ŠTAMPI) */}
+            <section className="no-print bg-gradient-to-br from-[#1E293B] to-[#0F172A] rounded-[2.5rem] md:rounded-[3rem] border border-blue-500/20 shadow-2xl flex flex-col h-[500px] md:h-[700px] overflow-hidden">
               <div className="p-6 border-b border-white/5 flex justify-between items-center bg-black/20">
-                <h3 className="text-xs font-[1000] italic tracking-widest text-blue-400 uppercase">GEMINI PRO EXPERT SYSTEM</h3>
+                <h3 className="text-xs font-[1000] italic tracking-widest text-blue-400 uppercase">GEMINI PRO</h3>
                 <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
               </div>
               <div className="flex-1 overflow-y-auto p-6 space-y-6">
@@ -194,28 +209,51 @@ export default function DetaljiNaloga() {
               </form>
             </section>
 
-            <section className="bg-[#1E293B] p-8 rounded-[2.5rem] border border-slate-800">
-              <label className="text-[9px] font-black text-slate-500 tracking-[0.4em] mb-6 block uppercase opacity-50">REZULTAT DIJAGNOSTIKE I BELEŠKE</label>
+            {/* BELEŠKE - VIDLJIVE I PRI ŠTAMPI */}
+            <section className="bg-[#1E293B] print:bg-white p-8 rounded-[2.5rem] border border-slate-800 print:border-none">
+              <label className="text-[9px] font-black text-slate-500 tracking-[0.4em] mb-6 block uppercase opacity-50 print:text-black print:opacity-100">NAPOMENE MAJSTORA I REZULTAT DIJAGNOSTIKE</label>
               <textarea 
-                className="w-full bg-transparent border-none text-xl font-bold italic text-white focus:ring-0 outline-none h-[120px]"
-                placeholder="UPIŠI BELEŠKE..."
+                className="w-full bg-transparent border-none text-xl font-bold italic text-white print:text-black focus:ring-0 outline-none h-[120px] print:h-auto"
+                placeholder="BEZ DODATNIH BELEŠKI."
                 defaultValue={nalog.belezke_majstora}
               ></textarea>
             </section>
           </div>
 
-          {/* DESNA KOLONA (Troškovi i Alati) */}
+          {/* DESNA KOLONA - TROŠKOVI */}
           <div className="space-y-6">
-            <section className="bg-[#1E293B] p-8 rounded-[2.5rem] border border-slate-800">
-              <h3 className="text-xs font-black mb-6 text-[#A3E635] tracking-widest uppercase">TROŠKOVI MATERIJALA</h3>
-              <div className="space-y-3 mb-6 bg-black/20 p-4 rounded-2xl">
+            <section className="bg-[#1E293B] print:bg-white p-8 rounded-[2.5rem] border border-slate-800 print:border-none">
+              <h3 className="text-xs font-black mb-6 text-[#A3E635] print:text-black tracking-widest uppercase">SPISAK TROŠKOVA</h3>
+              
+              {/* DODAVANJE STAVKE (SAKRIVA SE PRI ŠTAMPI) */}
+              <div className="no-print space-y-3 mb-6 bg-black/20 p-4 rounded-2xl">
                 <input type="text" placeholder="NAZIV DELA..." className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-[10px] font-black uppercase outline-none" value={novaStavka.naziv} onChange={(e) => setNovaStavka({...novaStavka, naziv: e.target.value})} />
                 <div className="flex gap-2">
                   <input type="number" placeholder="CENA" className="flex-1 bg-white/5 border border-white/10 rounded-xl p-3 text-[10px] font-black outline-none" value={novaStavka.cena} onChange={(e) => setNovaStavka({...novaStavka, cena: e.target.value})} />
                   <button onClick={snimiTrosak} className="bg-[#A3E635] text-black px-5 rounded-xl font-[1000] text-[10px] uppercase">DODAJ</button>
                 </div>
               </div>
-              <div className="space-y-3 max-h-[250px] overflow-y-auto">
+
+              {/* LISTA TROŠKOVA (TABELA ZA ŠTAMPU) */}
+              <table className="hidden print:table print-table">
+                <thead>
+                  <tr>
+                    <th>OPIS</th>
+                    <th style={{textAlign: 'right'}}>IZNOS (RSD)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {troskovi.map((t, i) => (
+                    <tr key={i}>
+                      <td>{t.naziv}</td>
+                      <td style={{textAlign: 'right'}}>{Number(t.cena).toLocaleString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              {/* LISTA TROŠKOVA (MOBILNA/WEB VERZIJA - SAKRIVA SE PRI ŠTAMPI) */}
+              <div className="no-print space-y-3 max-h-[250px] overflow-y-auto">
                 {troskovi.map((t, i) => (
                   <div key={i} className="flex justify-between items-center bg-[#0F172A] p-4 rounded-xl border border-white/5">
                     <div className="flex flex-col">
@@ -228,8 +266,8 @@ export default function DetaljiNaloga() {
               </div>
             </section>
 
-            {/* TESTER AKUMULATORA */}
-            <section className="bg-black/40 p-8 rounded-[2.5rem] border border-slate-800">
+            {/* TESTER AKUMULATORA (SAKRIVA SE PRI ŠTAMPI) */}
+            <section className="no-print bg-black/40 p-8 rounded-[2.5rem] border border-slate-800">
               <div className="bg-[#1E293B] p-5 rounded-2xl">
                 <p className="text-[8px] font-black mb-3 opacity-50 tracking-widest">TESTER AKUMULATORA (V)</p>
                 <div className="flex gap-3 items-center">
@@ -240,9 +278,9 @@ export default function DetaljiNaloga() {
             </section>
 
             {/* TOTAL */}
-            <div className="bg-[#A3E635] p-10 rounded-[2.5rem] text-black shadow-xl">
-              <p className="text-[9px] font-black opacity-60 uppercase tracking-widest">Ukupno za naplatu</p>
-              <p className="text-4xl font-[1000] italic mt-3">{ukupno.toLocaleString()} RSD</p>
+            <div className="bg-[#A3E635] print:bg-transparent print:text-black p-10 print:p-0 rounded-[2.5rem] text-black shadow-xl print:shadow-none print:text-right">
+              <p className="text-[9px] font-black opacity-60 uppercase tracking-widest print:opacity-100">Ukupno za naplatu</p>
+              <p className="text-4xl font-[1000] italic mt-3 print:border-t-2 print:border-black print:pt-2">{ukupno.toLocaleString()} RSD</p>
             </div>
           </div>
         </div>
