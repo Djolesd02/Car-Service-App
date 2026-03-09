@@ -1,0 +1,4 @@
+host: gateway01.eu-central-1.prod.aws.tidbcloud.com
+port: 4000
+username: 7kpdYW7Zmwq89LM.root
+password: 5FfrRyIAyIjy0PBy

@@ -1,0 +1,45 @@
+CREATE TABLE vozila (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    registracija VARCHAR(20) NOT NULL UNIQUE,
+    marka VARCHAR(50) NOT NULL,
+    model VARCHAR(50) NOT NULL,
+    godiste INT,
+    boja VARCHAR(30),
+    radio_kod VARCHAR(20),
+    sasija_vin VARCHAR(17),
+    kod_motora VARCHAR(20),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE radni_nalozi (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    vozilo_id INT NOT NULL,
+    status ENUM('Na čekanju', 'U radu', 'Čeka delove', 'Završeno') DEFAULT 'Na čekanju',
+    arhiviran TINYINT(1) DEFAULT 0,
+    opis_kvara_klijent TEXT,
+    belezke_majstora TEXT,
+    dijagnostika_url VARCHAR(500),
+    mapa_url VARCHAR(500),
+    datum_prijema TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    datum_zavrsetka DATETIME,
+    FOREIGN KEY (vozilo_id) REFERENCES vozila(id) ON DELETE CASCADE
+);
+
+CREATE TABLE troskovi_stavke (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    radni_nalog_id INT NOT NULL,
+    naziv VARCHAR(255) NOT NULL,
+    tip ENUM('deo', 'usluga') DEFAULT 'deo',
+    cena DECIMAL(10, 2) NOT NULL DEFAULT 0,
+    kolicina INT DEFAULT 1,
+    FOREIGN KEY (radni_nalog_id) REFERENCES radni_nalozi(id) ON DELETE CASCADE
+);
+
+CREATE TABLE ai_istorija (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    radni_nalog_id INT NOT NULL,
+    uloga ENUM('user', 'model') NOT NULL,
+    sadrzaj TEXT NOT NULL,
+    vreme TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (radni_nalog_id) REFERENCES radni_nalozi(id) ON DELETE CASCADE
+);
